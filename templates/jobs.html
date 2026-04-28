@@ -7,29 +7,67 @@
 <body>
 
 <div class="container">
-    <h2>Available Jobs</h2>
 
-    <!-- Search Form -->
-    <form method="GET">
-        <input type="text" name="search" placeholder="Search job title">
-        <input type="text" name="location" placeholder="Filter by location">
-        <button type="submit">Search</button>
+    <h2 style="text-align:center;">💼 Available Jobs</h2>
+
+    <!-- 🔍 SEARCH + FILTER -->
+    <form method="GET" style="margin-bottom: 20px; text-align:center;">
+        <input type="text" name="search" placeholder="🔎 Job title"
+               style="padding:8px; border-radius:8px; border:none; margin:5px;">
+
+        <input type="text" name="location" placeholder="📍 Location"
+               style="padding:8px; border-radius:8px; border:none; margin:5px;">
+
+        <select name="category" style="padding:8px; border-radius:8px; border:none; margin:5px;">
+            <option value="">All Categories</option>
+            <option>Construction</option>
+            <option>Farming</option>
+            <option>Cleaning</option>
+            <option>Delivery</option>
+            <option>Electrician</option>
+            <option>Other</option>
+        </select>
+
+        <button type="submit"
+                style="padding:8px 12px; border:none; border-radius:8px; background:#22c55e; color:white;">
+            Search
+        </button>
     </form>
 
-    <!-- Job List -->
+    <!-- 📋 JOB LIST -->
     {% for job in jobs %}
-        <div class="card">
-            <h3>{{ job[1] }}</h3>
-            <p><b>Location:</b> {{ job[2] }}</p>
-            <p><b>Contact:</b> {{ job[3] }}</p>
-            <p><b>Salary:</b> {{ job[4] }}</p>
-            <p><b>Workers:</b> {{ job[5] }}</p>
-            <p><b>Meals:</b> {{ job[6] }}</p>
-            <p>{{ job[7] }}</p>
-        </div>
+    <div class="card">
+
+        <h3>{{ job[1] }}</h3>
+
+        <p><b>📍 Location:</b> {{ job[2] }}</p>
+
+        <p><b>📂 Category:</b> {{ job[8] if job|length > 8 else "Not specified" }}</p>
+
+        <p><b>💰 Salary:</b> {{ job[4] }}</p>
+
+        <p><b>👷 Workers Needed:</b> {{ job[5] }}</p>
+
+        <p><b>🍱 Meals:</b> {{ job[6] }}</p>
+
+        <p style="opacity:0.8;">{{ job[7] }}</p>
+
+        <!-- 📱 WhatsApp Contact -->
+        <a class="btn"
+           href="https://wa.me/{{ job[3] }}?text=Hi, I saw your job on Community Help App"
+           target="_blank">
+           📱 Contact on WhatsApp
+        </a>
+
+    </div>
     {% endfor %}
 
-    <a href="/">Back</a>
+    <br>
+
+    <div style="text-align:center;">
+        <a class="btn" href="/">⬅ Back</a>
+    </div>
+
 </div>
 
 </body>
