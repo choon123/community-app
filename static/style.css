@@ -8,9 +8,9 @@ body {
 
 /* 📦 MAIN CONTAINER */
 .container {
-    max-width: 420px;
+    max-width: 460px;
     margin: auto;
-    padding: 20px;
+    padding: 24px;
 }
 
 /* 🧠 HEADER */
@@ -20,89 +20,102 @@ body {
 }
 
 .header h1 {
-    font-size: 22px;
-    margin-bottom: 5px;
+    font-size: 24px;
+    margin-bottom: 6px;
     font-weight: 600;
 }
 
 .subtitle {
     font-size: 13px;
-    opacity: 0.7;
+    opacity: 0.75;
+}
+
+/* 👋 WELCOME */
+.welcome {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 13px;
+    opacity: 0.85;
 }
 
 /* 💬 MESSAGE BOX */
 .message {
-    margin: 15px 0;
-    padding: 12px;
-    border-radius: 12px;
+    margin: 18px 0;
+    padding: 14px;
+    border-radius: 14px;
     background: rgba(255,255,255,0.08);
     text-align: center;
     font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
-/* 🧩 DASHBOARD GRID (MORE CLEAN) */
+/* 🧩 DASHBOARD GRID */
 .dashboard {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 25px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 28px;
 }
 
-/* 🧱 CARD DESIGN (SMALLER + PREMIUM) */
+/* 🧱 CARD DESIGN (IMPROVED) */
 .card {
-    background: rgba(255,255,255,0.07);
-    padding: 16px 10px;
-    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    padding: 18px 12px;
+    border-radius: 16px;
     text-align: center;
     text-decoration: none;
     color: white;
 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 
-    transition: all 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.08);
+
+    transition: all 0.25s ease;
+}
+
+/* ✨ HOVER */
+.card:hover {
+    transform: translateY(-5px) scale(1.03);
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
 }
 
 /* 🔹 ICON */
 .card .icon {
-    font-size: 20px;
+    font-size: 26px;
 }
 
-/* 🔹 TEXT LABEL */
+/* 🔹 TEXT LABEL (FIXED VISIBILITY) */
 .card .label {
     display: block;
-    font-size: 11px;
-    margin-top: 6px;
-    opacity: 0.8;
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+    opacity: 0.95;
 }
 
-/* ✨ HOVER EFFECT (SUBTLE & CLEAN) */
-.card:hover {
-    transform: translateY(-3px);
-    background: rgba(255,255,255,0.15);
-}
-
-/* 🚀 PRIMARY ACTION (POST JOB) */
+/* 🚀 PRIMARY ACTION */
 .highlight {
-    background: linear-gradient(135deg, #6366f1, #22c55e);
-    color: white;
+    background: linear-gradient(135deg, #4f46e5, #22c55e);
+    box-shadow: 0 8px 20px rgba(79,70,229,0.4);
 }
 
-/* 🌐 LANGUAGE SECTION */
+/* 🌐 LANGUAGE */
 .language {
     margin-top: 30px;
     text-align: center;
 }
 
-/* 🌍 LANGUAGE BUTTONS (MORE ELEGANT) */
+/* 🌍 LANGUAGE BUTTONS */
 .language a {
     margin: 0 6px;
     text-decoration: none;
-    padding: 6px 10px;
+    padding: 7px 12px;
     border-radius: 10px;
     background: rgba(255,255,255,0.08);
     color: white;
-    font-size: 11px;
+    font-size: 12px;
     transition: 0.2s;
 }
 
@@ -111,15 +124,7 @@ body {
     background: rgba(255,255,255,0.2);
 }
 
-/* 👋 USER WELCOME TEXT */
-.welcome {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-/* 📱 MOBILE PERFECT SPACING */
+/* 📱 MOBILE */
 @media (max-width: 400px) {
     .dashboard {
         grid-template-columns: repeat(2, 1fr);
