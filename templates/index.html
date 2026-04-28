@@ -27,7 +27,7 @@
 
     <!-- WELCOME -->
     {% if 'user' in session %}
-        <p class="welcome">👋 Welcome, {{ session['user'] }}</p>
+        <p class="welcome">👋 Welcome, {{ session['user'] }} — Ready to explore or post?</p>
     {% endif %}
 
     <!-- MESSAGE -->
@@ -35,51 +35,48 @@
         <div class="message">{{ message }}</div>
     {% endif %}
 
+    <!-- GUIDE MESSAGE -->
+    <div class="message">
+        {% if 'user' in session %}
+            🚀 Tip: Post a job or explore opportunities near you
+        {% else %}
+            👉 Start by registering or explore jobs
+        {% endif %}
+    </div>
+
     <!-- DASHBOARD -->
     <div class="dashboard">
 
         <a class="card" href="/register">
             <div class="icon">📝</div>
-            <div class="label">
-                {{ t.register if t and t.register else "Register" }}
-            </div>
+            <div class="label">Register</div>
         </a>
 
         <a class="card" href="/login">
             <div class="icon">🔐</div>
-            <div class="label">
-                {{ t.login if t and t.login else "Login" }}
-            </div>
+            <div class="label">Login</div>
         </a>
 
         <a class="card" href="/jobs">
             <div class="icon">💼</div>
-            <div class="label">
-                {{ t.jobs if t and t.jobs else "Jobs" }}
-            </div>
+            <div class="label">View Jobs</div>
         </a>
 
         {% if 'user' in session %}
         <a class="card highlight" href="/post">
             <div class="icon">➕</div>
-            <div class="label">
-                {{ t.post if t and t.post else "Post Job" }}
-            </div>
+            <div class="label">Post Job</div>
         </a>
 
         <a class="card" href="/logout">
             <div class="icon">🚪</div>
-            <div class="label">
-                {{ t.logout if t and t.logout else "Logout" }}
-            </div>
+            <div class="label">Logout</div>
         </a>
         {% endif %}
 
         <a class="card" href="/contacts">
             <div class="icon">📞</div>
-            <div class="label">
-                {{ t.contacts if t and t.contacts else "Emergency" }}
-            </div>
+            <div class="label">Emergency</div>
         </a>
 
     </div>
