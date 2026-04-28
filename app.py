@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     salary TEXT,
     workers TEXT,
     meals TEXT,
-    description TEXT
+    description TEXT,
+    category TEXT
 );
 """)
 
