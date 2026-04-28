@@ -7,29 +7,37 @@
 <body>
 
 <div class="container">
-    <h2>Available Jobs</h2>
+    <h2>💼 Available Jobs</h2>
 
-    <!-- Search Form -->
+    <!-- SEARCH -->
     <form method="GET">
-        <input type="text" name="search" placeholder="Search job title">
-        <input type="text" name="location" placeholder="Filter by location">
+        <input type="text" name="search" placeholder="Search job">
+        <input type="text" name="location" placeholder="Location">
         <button type="submit">Search</button>
     </form>
 
-    <!-- Job List -->
+    <br>
+
     {% for job in jobs %}
         <div class="card">
             <h3>{{ job[1] }}</h3>
-            <p><b>Location:</b> {{ job[2] }}</p>
-            <p><b>Contact:</b> {{ job[3] }}</p>
-            <p><b>Salary:</b> {{ job[4] }}</p>
-            <p><b>Workers:</b> {{ job[5] }}</p>
-            <p><b>Meals:</b> {{ job[6] }}</p>
+
+            <p>📍 {{ job[2] }}</p>
+            <p>📞 {{ job[3] }}</p>
+            <p>💰 {{ job[4] }}</p>
+            <p>👷 {{ job[5] }}</p>
+            <p>🍛 {{ job[6] }}</p>
             <p>{{ job[7] }}</p>
+
+            {% if 'user' in session %}
+            <a href="/save/{{ job[0] }}" class="btn">❤️ Save</a>
+            {% endif %}
         </div>
     {% endfor %}
 
-    <a href="/">Back</a>
+    <br>
+    <a href="/">⬅ Back</a>
+
 </div>
 
 </body>
