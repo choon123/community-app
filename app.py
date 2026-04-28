@@ -10,7 +10,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
-# 🛠️ Create tables
+# 🛠️ Create tables (UPDATED with category)
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -28,31 +28,56 @@ CREATE TABLE IF NOT EXISTS jobs (
     salary TEXT,
     workers TEXT,
     meals TEXT,
-    description TEXT
+    description TEXT,
+    category TEXT
 );
 """)
 
 conn.commit()
 
-# 🌐 LANGUAGE SYSTEM
+# 🌐 LANGUAGE SYSTEM (UPDATED FULL)
 translations = {
     "en": {
         "title": "Community Help App",
+        "register": "Register",
+        "login": "Login",
+        "jobs": "View Jobs",
+        "post": "Post Job",
+        "logout": "Logout",
+        "contacts": "Emergency Contacts",
         "welcome_login": "Welcome back! Keep going, you are doing great 💪",
         "welcome_register": "Welcome! Your journey starts here 🚀"
     },
     "hi": {
         "title": "समुदाय सहायता ऐप",
+        "register": "रजिस्टर",
+        "login": "लॉगिन",
+        "jobs": "नौकरियाँ देखें",
+        "post": "नौकरी पोस्ट करें",
+        "logout": "लॉगआउट",
+        "contacts": "आपातकालीन संपर्क",
         "welcome_login": "वापसी पर स्वागत है! आप बहुत अच्छा कर रहे हैं 💪",
         "welcome_register": "स्वागत है! आपकी यात्रा यहीं से शुरू होती है 🚀"
     },
     "mr": {
         "title": "समुदाय मदत अ‍ॅप",
+        "register": "नोंदणी",
+        "login": "लॉगिन",
+        "jobs": "नोकऱ्या पहा",
+        "post": "नोकरी पोस्ट करा",
+        "logout": "बाहेर पडा",
+        "contacts": "आपत्कालीन संपर्क",
         "welcome_login": "पुन्हा स्वागत आहे! तुम्ही खूप छान करत आहात 💪",
         "welcome_register": "स्वागत आहे! तुमचा प्रवास इथून सुरू होतो 🚀"
     },
     "kr": {
         "title": "커뮤니티 도움 앱",
+        "register": "회원가입",
+        "login": "로그인",
+        "jobs": "일자리 보기",
+        "post": "일자리 등록",
+        "logout": "로그아웃",
+        "contacts": "긴급 연락처",
         "welcome_login": "다시 오신 것을 환영합니다! 잘하고 있어요 💪",
         "welcome_register": "환영합니다! 당신의 여정이 시작됩니다 🚀"
     }
@@ -74,14 +99,36 @@ def index():
     message = session.pop('message', None)
     return render_template('index.html', t=t, message=message)
 
-# 📋 View Jobs
+# 📋 View Jobs (🔥 FULL SEARCH + FILTER)
 @app.route('/jobs')
 def jobs():
-    cursor.execute("SELECT * FROM jobs ORDER BY id DESC")
+    search = request.args.get('search', '')
+    location = request.args.get('location', '')
+    category = request.args.get('category', '')
+
+    query = "SELECT * FROM jobs WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND title ILIKE %s"
+        params.append(f"%{search}%")
+
+    if location:
+        query += " AND location ILIKE %s"
+        params.append(f"%{location}%")
+
+    if category:
+        query += " AND category = %s"
+        params.append(category)
+
+    query += " ORDER BY id DESC"
+
+    cursor.execute(query, params)
     data = cursor.fetchall()
+
     return render_template('jobs.html', jobs=data)
 
-# ➕ Post Job
+# ➕ Post Job (UPDATED with category)
 @app.route('/post', methods=['GET', 'POST'])
 def post_job():
     if 'user' not in session:
@@ -95,11 +142,12 @@ def post_job():
         workers = request.form['workers']
         meals = request.form['meals']
         description = request.form['description']
+        category = request.form['category']  # NEW
 
         cursor.execute("""
-        INSERT INTO jobs (title, location, contact, salary, workers, meals, description)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (title, location, contact, salary, workers, meals, description))
+        INSERT INTO jobs (title, location, contact, salary, workers, meals, description, category)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (title, location, contact, salary, workers, meals, description, category))
 
         conn.commit()
         return redirect('/jobs')
