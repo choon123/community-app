@@ -1,106 +1,235 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ t.title if t and t.title else "Community Help App" }}</title>
+from flask import Flask, render_template, request, redirect, session
+import os
+import psycopg2
 
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#111827">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+app = Flask(__name__)
+app.secret_key = "secret123"
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+# 🔗 Database Connection (SAFE VERSION)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-    <link rel="stylesheet" href="/static/style.css">
-</head>
+def get_conn():
+    return psycopg2.connect(DATABASE_URL)
 
-<body>
+# 🛠️ Create Tables
+conn = get_conn()
+cursor = conn.cursor()
 
-<div class="container">
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username TEXT,
+    password TEXT
+);
+""")
 
-    <!-- HEADER -->
-    <div class="header">
-        <h1>🌍 {{ t.title if t and t.title else "Community Help App" }}</h1>
-        <p class="subtitle">
-            {{ t.subtitle if t and t.subtitle else "Connecting people with opportunities" }}
-        </p>
-    </div>
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS jobs (
+    id SERIAL PRIMARY KEY,
+    title TEXT,
+    location TEXT,
+    contact TEXT,
+    salary TEXT,
+    workers TEXT,
+    meals TEXT,
+    description TEXT
+);
+""")
 
-    <!-- WELCOME -->
-    {% if 'user' in session %}
-        <p class="welcome">👋 Welcome, {{ session['user'] }}</p>
-    {% endif %}
+# ⭐ NEW TABLE (SAVE JOBS)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS saved_jobs (
+    id SERIAL PRIMARY KEY,
+    username TEXT,
+    job_id INTEGER
+);
+""")
 
-    <!-- MESSAGE -->
-    {% if message %}
-        <div class="message">{{ message }}</div>
-    {% endif %}
+conn.commit()
+conn.close()
 
-    <!-- DASHBOARD -->
-    <div class="dashboard">
-
-        <a class="card" href="/register">
-            <div class="icon">📝</div>
-            <div class="label">
-                {{ t.register if t and t.register else "Register" }}
-            </div>
-        </a>
-
-        <a class="card" href="/login">
-            <div class="icon">🔐</div>
-            <div class="label">
-                {{ t.login if t and t.login else "Login" }}
-            </div>
-        </a>
-
-        <a class="card" href="/jobs">
-            <div class="icon">💼</div>
-            <div class="label">
-                {{ t.jobs if t and t.jobs else "Jobs" }}
-            </div>
-        </a>
-
-        {% if 'user' in session %}
-        <a class="card highlight" href="/post">
-            <div class="icon">➕</div>
-            <div class="label">
-                {{ t.post if t and t.post else "Post Job" }}
-            </div>
-        </a>
-
-        <a class="card" href="/logout">
-            <div class="icon">🚪</div>
-            <div class="label">
-                {{ t.logout if t and t.logout else "Logout" }}
-            </div>
-        </a>
-        {% endif %}
-
-        <a class="card" href="/contacts">
-            <div class="icon">📞</div>
-            <div class="label">
-                {{ t.contacts if t and t.contacts else "Emergency" }}
-            </div>
-        </a>
-
-    </div>
-
-    <!-- LANGUAGE -->
-    <div class="language">
-        <p>🌐 Language</p>
-
-        <a href="/set_language/en">EN</a>
-        <a href="/set_language/hi">हिं</a>
-        <a href="/set_language/mr">मर</a>
-        <a href="/set_language/kr">한</a>
-    </div>
-
-</div>
-
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/static/sw.js');
+# 🌐 LANGUAGE SYSTEM
+translations = {
+    "en": {
+        "title": "Community Help App",
+        "register": "Register",
+        "login": "Login",
+        "jobs": "Jobs",
+        "post": "Post Job",
+        "logout": "Logout",
+        "contacts": "Emergency",
+        "saved": "Saved Jobs",
+        "welcome_login": "Welcome back! Keep going 💪",
+        "welcome_register": "Welcome! Your journey starts 🚀"
+    }
 }
-</script>
 
-</body>
-</html>
+def get_lang():
+    return session.get('lang', 'en')
+
+@app.route('/set_language/<lang>')
+def set_language(lang):
+    session['lang'] = lang
+    return redirect('/')
+
+# 🏠 Home
+@app.route('/')
+def index():
+    t = translations["en"]
+    message = session.pop('message', None)
+    return render_template('index.html', t=t, message=message)
+
+# 📋 Jobs (with SEARCH)
+@app.route('/jobs')
+def jobs():
+    search = request.args.get('search')
+    location = request.args.get('location')
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM jobs WHERE 1=1"
+    values = []
+
+    if search:
+        query += " AND title ILIKE %s"
+        values.append(f"%{search}%")
+
+    if location:
+        query += " AND location ILIKE %s"
+        values.append(f"%{location}%")
+
+    query += " ORDER BY id DESC"
+
+    cursor.execute(query, values)
+    data = cursor.fetchall()
+
+    conn.close()
+    return render_template('jobs.html', jobs=data)
+
+# ➕ Post Job
+@app.route('/post', methods=['GET', 'POST'])
+def post_job():
+    if 'user' not in session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        conn = get_conn()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        INSERT INTO jobs (title, location, contact, salary, workers, meals, description)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (
+            request.form['title'],
+            request.form['location'],
+            request.form['contact'],
+            request.form['salary'],
+            request.form['workers'],
+            request.form['meals'],
+            request.form['description']
+        ))
+
+        conn.commit()
+        conn.close()
+
+        return redirect('/jobs')
+
+    return render_template('post_job.html')
+
+# ❤️ SAVE JOB
+@app.route('/save/<int:job_id>')
+def save_job(job_id):
+    if 'user' not in session:
+        return redirect('/login')
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO saved_jobs (username, job_id)
+    VALUES (%s, %s)
+    """, (session['user'], job_id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/jobs')
+
+# ❤️ VIEW SAVED JOBS
+@app.route('/saved')
+def saved_jobs():
+    if 'user' not in session:
+        return redirect('/login')
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT jobs.* FROM jobs
+    JOIN saved_jobs ON jobs.id = saved_jobs.job_id
+    WHERE saved_jobs.username = %s
+    ORDER BY jobs.id DESC
+    """, (session['user'],))
+
+    data = cursor.fetchall()
+    conn.close()
+
+    return render_template('jobs.html', jobs=data)
+
+# 📝 Register
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        conn = get_conn()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        INSERT INTO users (username, password)
+        VALUES (%s, %s)
+        """, (request.form['username'], request.form['password']))
+
+        conn.commit()
+        conn.close()
+
+        session['message'] = "Welcome! 🚀"
+        return redirect('/')
+
+    return render_template('register.html')
+
+# 🔐 Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        conn = get_conn()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT * FROM users WHERE username=%s AND password=%s
+        """, (request.form['username'], request.form['password']))
+
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            session['user'] = request.form['username']
+            session['message'] = "Welcome back 💪"
+            return redirect('/')
+        else:
+            return "Invalid login"
+
+    return render_template('login.html')
+
+# 🚪 Logout
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/')
+
+# 📞 Contacts
+@app.route('/contacts')
+def contacts():
+    return render_template('contacts.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
