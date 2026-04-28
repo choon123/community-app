@@ -95,11 +95,12 @@ def post_job():
         workers = request.form['workers']
         meals = request.form['meals']
         description = request.form['description']
+        category = request.form['category']
 
         cursor.execute("""
-        INSERT INTO jobs (title, location, contact, salary, workers, meals, description)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (title, location, contact, salary, workers, meals, description))
+        INSERT INTO jobs (title, location, contact, salary, workers, meals, description, category)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (title, location, contact, salary, workers, meals, description, category))
 
         conn.commit()
         return redirect('/jobs')
